@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Make PDF text layer selectable */
+.react-pdf__Page__textContent {
+  color: transparent !important;
+  cursor: text !important;
+}
+
+.react-pdf__Page__textContent span {
+  cursor: text !important;
+}
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+}
