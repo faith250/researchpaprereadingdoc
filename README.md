@@ -8,11 +8,11 @@
 
 ---
 
-## 🎬 Demo Video
+## 🎬 Demo
 
-<video src="https://raw.githubusercontent.com/faith250/researchpaprereadingdoc/main/docs/githubdemo.mp4" controls width="100%"></video>
+![Research Notes Demo](docs/demo.gif)
 
-> [▶ Click here to watch the demo](https://raw.githubusercontent.com/faith250/researchpaprereadingdoc/main/docs/githubdemo.mp4) — Upload a PDF, highlight text, get AI explanations, attach diagrams, and export annotated notes.
+> Upload a PDF, highlight text, get AI explanations, attach diagrams, and export annotated notes — all in one tool.
 
 ---
 
