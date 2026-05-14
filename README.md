@@ -4,7 +4,7 @@
 
 ![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white) ![License](https://img.shields.io/badge/license-MIT-22c55e) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-f59e0b)
 
-**[🚀 Live Demo →](https://your-app.vercel.app)** &nbsp;|&nbsp; **[⭐ Star this repo](https://github.com/your-username/research-notes-app)**
+**[🚀 Live Demo →](https://researchpaprereadingdoc.vercel.app)** &nbsp;|&nbsp; **[⭐ Star this repo](https://github.com/faith250/researchpaprereadingdoc)**
 
 ---
 
