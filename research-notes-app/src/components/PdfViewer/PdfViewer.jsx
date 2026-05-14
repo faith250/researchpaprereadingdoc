@@ -187,6 +187,7 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
       {/* ── Tooltip ── */}
       {tooltip && (
         <div
+          onMouseUp={(e) => e.stopPropagation()}
           style={{
             position: 'fixed',
             top: tooltipMode === 'ask' ? tooltip.y - 110 : tooltip.y - 64,
