@@ -99,7 +99,7 @@ function SplitPanel({ file, aiSettings }) {
   }, [file, aiSettings]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Note operations ──
-  function handleAddNote(highlightedText, rects, pageIndex, aiExplanation, question) {
+  function handleAddNote(highlightedText, rects, pageIndex, aiExplanation, question, image = null) {
     const newNote = {
       id: Date.now(),
       type: 'highlight',
@@ -108,6 +108,7 @@ function SplitPanel({ file, aiSettings }) {
       pageIndex,
       question: question || null,        // null = explain, string = ask
       aiExplanation: aiExplanation || '',
+      image: image || null,              // base64 data URL for attached image
       userNote: '',
       timestamp: new Date().toLocaleTimeString(),
     }

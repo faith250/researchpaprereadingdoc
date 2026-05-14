@@ -12,12 +12,15 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
   const [loadingAi, setLoadingAi]       = useState(false)
   const [loadingLabel, setLoadingLabel] = useState('')
 
-  const containerRef   = useRef(null)
-  const localPageRefs  = useRef({})
-  const pdfDocRef      = useRef(null)   // PDFDocumentProxy from react-pdf
-  const pageTextsRef   = useRef({})     // cache: { pageIndex -> extracted text }
-  const askInputRef    = useRef(null)
-  const fullTextRef    = useRef('')     // accumulated full paper text
+  const containerRef        = useRef(null)
+  const localPageRefs       = useRef({})
+  const pdfDocRef           = useRef(null)   // PDFDocumentProxy from react-pdf
+  const pageTextsRef        = useRef({})     // cache: { pageIndex -> extracted text }
+  const askInputRef         = useRef(null)
+  const imageInputRef       = useRef(null)   // hidden file input for image attach
+  const pendingTooltipRef   = useRef(null)   // tooltip saved while file picker is open
+  const fullTextRef         = useRef('')     // accumulated full paper text
+  const tooltipModeRef      = useRef('buttons') // ref mirror so handleMouseUp always sees latest mode
 
   // ── Document loaded ──────────────────────────────────────────────────────
   function onDocumentLoadSuccess(pdf) {
@@ -77,7 +80,9 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
     setTimeout(() => {
       const selection = window.getSelection()
       const selectedText = selection?.toString().trim()
-      if (!selectedText || selectedText.length < 3) { setTooltip(null); return }
+      // Never auto-close from mouseUp — only open new tooltips for new selections
+      // Tooltip closes only via ✕, submit, or Escape (explicit user action)
+      if (!selectedText || selectedText.length < 3) return
 
       const range = selection.getRangeAt(0)
       const clientRects = Array.from(range.getClientRects())
@@ -100,6 +105,7 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
 
       setTooltip({ x: e.clientX, y: e.clientY, text: selectedText, rects: relativeRects, pageIndex })
       setTooltipMode('buttons')
+      tooltipModeRef.current = 'buttons'
       setAskInput('')
     }, 100)
   }
@@ -109,7 +115,7 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
     if (!tooltip?.text) return
     const { text, rects, pageIndex } = tooltip
     window.getSelection().removeAllRanges()
-    setTooltip(null)
+    closeTooltip()
     setLoadingAi(true)
     setLoadingLabel('AI is explaining…')
 
@@ -128,6 +134,7 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
 
   // ── Ask ──────────────────────────────────────────────────────────────────
   function handleOpenAsk() {
+    tooltipModeRef.current = 'ask'   // set ref BEFORE state so handleMouseUp sees it immediately
     setTooltipMode('ask')
     setAskInput('')
     setTimeout(() => askInputRef.current?.focus(), 50)
@@ -138,7 +145,7 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
     const { text, rects, pageIndex } = tooltip
     const question = askInput.trim()
     window.getSelection().removeAllRanges()
-    setTooltip(null)
+    closeTooltip()
     setLoadingAi(true)
     setLoadingLabel('AI is answering…')
 
@@ -152,7 +159,32 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
     }
 
     setLoadingAi(false)
+    tooltipModeRef.current = 'buttons'
     onAddNote(text, rects, pageIndex, aiAnswer, question)
+  }
+
+  // ── Image attach ─────────────────────────────────────────────────────────
+  function handleImageClick() {
+    // Save current tooltip so we can use it after file picker closes
+    pendingTooltipRef.current = tooltip
+    imageInputRef.current?.click()
+  }
+
+  function handleImageFile(e) {
+    const file = e.target.files?.[0]
+    if (!file || !pendingTooltipRef.current) return
+    // Reset file input so same file can be re-selected
+    e.target.value = ''
+
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const { text, rects, pageIndex } = pendingTooltipRef.current
+      const imageDataUrl = ev.target.result
+      closeTooltip()
+      pendingTooltipRef.current = null
+      onAddNote(text, rects, pageIndex, '', null, imageDataUrl)
+    }
+    reader.readAsDataURL(file)
   }
 
   // ── Highlights ───────────────────────────────────────────────────────────
@@ -160,10 +192,31 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
     return notes.filter((n) => n.pageIndex === pageIndex && n.rects?.length > 0)
   }
 
+  // ── Tooltip close helper ─────────────────────────────────────────────────
+  function closeTooltip() {
+    tooltipModeRef.current = 'buttons'
+    setTooltipMode('buttons')
+    setTooltip(null)
+  }
+
+  // ── Click outside tooltip → close (only when in buttons mode) ────────────
+  useEffect(() => {
+    if (!tooltip) return
+    function onDocMouseDown(e) {
+      // If in ask mode, never close on outside click — user is trying to type
+      if (tooltipModeRef.current === 'ask') return
+      const tooltipEl = document.querySelector('[data-tooltip]')
+      if (tooltipEl && tooltipEl.contains(e.target)) return
+      closeTooltip()
+    }
+    document.addEventListener('mousedown', onDocMouseDown)
+    return () => document.removeEventListener('mousedown', onDocMouseDown)
+  }, [tooltip]) // eslint-disable-line react-hooks/exhaustive-deps
+
   // ── Tooltip dismiss on Esc ───────────────────────────────────────────────
   const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Escape') setTooltip(null)
-  }, [])
+    if (e.key === 'Escape') closeTooltip()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div ref={containerRef} style={{ position: 'relative' }} onMouseUp={handleMouseUp} onKeyDown={handleKeyDown}>
@@ -187,7 +240,9 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
       {/* ── Tooltip ── */}
       {tooltip && (
         <div
+          data-tooltip="true"
           onMouseUp={(e) => e.stopPropagation()}
+          onMouseDown={(e) => e.stopPropagation()}
           style={{
             position: 'fixed',
             top: tooltipMode === 'ask' ? tooltip.y - 110 : tooltip.y - 64,
@@ -208,26 +263,27 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
             <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
               <button
                 onMouseDown={(e) => { e.preventDefault(); handleExplain() }}
-                style={{
-                  color: '#93c5fd', fontSize: '13px', cursor: 'pointer',
-                  background: 'none', border: 'none', fontWeight: 600, padding: '2px 0',
-                }}
+                style={{ color: '#93c5fd', fontSize: '13px', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600, padding: '2px 0' }}
               >
                 ✨ Explain
               </button>
               <span style={{ color: '#374151' }}>|</span>
               <button
                 onMouseDown={(e) => { e.preventDefault(); handleOpenAsk() }}
-                style={{
-                  color: '#86efac', fontSize: '13px', cursor: 'pointer',
-                  background: 'none', border: 'none', fontWeight: 600, padding: '2px 0',
-                }}
+                style={{ color: '#86efac', fontSize: '13px', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600, padding: '2px 0' }}
               >
                 💬 Ask
               </button>
               <span style={{ color: '#374151' }}>|</span>
               <button
-                onMouseDown={(e) => { e.preventDefault(); setTooltip(null) }}
+                onMouseDown={(e) => { e.preventDefault(); handleImageClick() }}
+                style={{ color: '#fb923c', fontSize: '13px', cursor: 'pointer', background: 'none', border: 'none', fontWeight: 600, padding: '2px 0' }}
+              >
+                📷 Image
+              </button>
+              <span style={{ color: '#374151' }}>|</span>
+              <button
+                onMouseDown={(e) => { e.preventDefault(); closeTooltip() }}
                 style={{ color: '#9ca3af', fontSize: '12px', cursor: 'pointer', background: 'none', border: 'none' }}
               >
                 ✕
@@ -282,7 +338,7 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
                   ← back
                 </button>
                 <button
-                  onMouseDown={(e) => { e.preventDefault(); setTooltip(null) }}
+                  onMouseDown={(e) => { e.preventDefault(); closeTooltip() }}
                   style={{ fontSize: '11px', color: '#6b7280', background: 'none', border: 'none', cursor: 'pointer' }}
                 >
                   cancel
@@ -292,6 +348,15 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
           )}
         </div>
       )}
+
+      {/* ── Hidden image file input ── */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        style={{ display: 'none' }}
+        onChange={handleImageFile}
+      />
 
       {/* ── PDF document ── */}
       <Document file={file} onLoadSuccess={onDocumentLoadSuccess}>
@@ -326,11 +391,13 @@ function PdfViewer({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
                         position: 'absolute',
                         top: rect.top, left: rect.left,
                         width: rect.width, height: rect.height,
-                        background: note.question
-                          ? (isActive ? 'rgba(134,239,172,0.55)' : 'rgba(134,239,172,0.25)')
-                          : (isActive ? 'rgba(251,191,36,0.5)' : 'rgba(253,224,71,0.2)'),
+                        background: note.image
+                          ? (isActive ? 'rgba(251,146,60,0.55)' : 'rgba(251,146,60,0.25)')
+                          : note.question
+                            ? (isActive ? 'rgba(134,239,172,0.55)' : 'rgba(134,239,172,0.25)')
+                            : (isActive ? 'rgba(251,191,36,0.5)' : 'rgba(253,224,71,0.2)'),
                         border: isActive
-                          ? `1px solid ${note.question ? 'rgba(134,239,172,0.8)' : 'rgba(251,191,36,0.7)'}`
+                          ? `1px solid ${note.image ? 'rgba(251,146,60,0.8)' : note.question ? 'rgba(134,239,172,0.8)' : 'rgba(251,191,36,0.7)'}`
                           : 'none',
                         pointerEvents: 'all', zIndex: 5,
                         borderRadius: '2px', cursor: 'pointer',

@@ -75,7 +75,7 @@ export function exportAsMarkdown(notes, pdfName) {
 // ─────────────────────────────────────────────
 // 2. PDF export (jsPDF)
 // ─────────────────────────────────────────────
-export function exportAsPDF(notes, pdfName) {
+export async function exportAsPDF(notes, pdfName) {
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
   const PAGE_W = 210
   const MARGIN = 14
@@ -125,7 +125,8 @@ export function exportAsPDF(notes, pdfName) {
   y += 10
 
   // ── Notes ──
-  notes.forEach((note, i) => {
+  for (let i = 0; i < notes.length; i++) {
+    const note = notes[i]
     maybeNewPage(30)
 
     // Note header pill
@@ -154,6 +155,23 @@ export function exportAsPDF(notes, pdfName) {
     doc.setTextColor(55, 65, 81)
     doc.text(hlLines, MARGIN + 5, y)
     y += hlH + 2
+
+    // Attached image
+    if (note.image) {
+      try {
+        const imgEl = await new Promise((res) => {
+          const i = new Image(); i.onload = () => res(i); i.src = note.image
+        })
+        const ratio = imgEl.width / imgEl.height
+        const maxW = TEXT_W - 6
+        const maxH = 70
+        const imgW = ratio > maxW / maxH ? maxW : maxH * ratio
+        const imgH = ratio > maxW / maxH ? maxW / ratio : maxH
+        maybeNewPage(imgH + 6)
+        doc.addImage(note.image, 'JPEG', MARGIN + 3, y, imgW, imgH)
+        y += imgH + 6
+      } catch { /* skip broken image */ }
+    }
 
     // AI Explanation
     if (note.aiExplanation) {
@@ -196,7 +214,7 @@ export function exportAsPDF(notes, pdfName) {
     doc.setDrawColor(229, 231, 235)
     doc.line(MARGIN, y, PAGE_W - MARGIN, y)
     y += 8
-  })
+  }
 
   // Page numbers
   const totalPages = doc.getNumberOfPages()
@@ -395,7 +413,38 @@ export async function exportPaperWithNotes(notes, file) {
     const canvas = document.createElement('canvas')
     canvas.width = viewport.width
     canvas.height = viewport.height
-    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
+    const ctx = canvas.getContext('2d')
+    await page.render({ canvasContext: ctx, viewport }).promise
+
+    // ── Draw highlights on top of the rendered page ──
+    // Browser renders Page at width=580; canvas is at scale 2.5 natural size
+    // so scaleFactor = canvas.width / 580
+    const scaleFactor = canvas.width / 580
+    pageNotes.forEach((note) => {
+      if (!note.rects?.length) return
+      const color = note.image
+        ? 'rgba(251,146,60,0.35)'
+        : note.question
+          ? 'rgba(134,239,172,0.40)'
+          : 'rgba(253,224,71,0.45)'
+      const border = note.image ? 'rgba(251,146,60,0.7)' : note.question ? 'rgba(74,222,128,0.7)' : 'rgba(250,204,21,0.7)'
+      note.rects.forEach((rect) => {
+        const x = rect.left * scaleFactor
+        const y = rect.top * scaleFactor
+        const w = rect.width * scaleFactor
+        const h = rect.height * scaleFactor
+        ctx.save()
+        ctx.globalCompositeOperation = 'multiply'
+        ctx.fillStyle = color
+        ctx.fillRect(x, y, w, h)
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.strokeStyle = border
+        ctx.lineWidth = 1
+        ctx.strokeRect(x, y, w, h)
+        ctx.restore()
+      })
+    })
+
     const imgData = canvas.toDataURL('image/jpeg', 0.92)
 
     // Scale to fit LEFT_W × CONTENT_H, centered
@@ -425,8 +474,9 @@ export async function exportPaperWithNotes(notes, file) {
     // ── Notes column ──
     let y = CONTENT_Y + 1
 
-    pageNotes.forEach((note, noteIdx) => {
-      if (y >= PH - M - 6) return
+    for (let noteIdx = 0; noteIdx < pageNotes.length; noteIdx++) {
+      const note = pageNotes[noteIdx]
+      if (y >= PH - M - 6) break
 
       // Highlight quote (yellow pill)
       const hlLines = doc.splitTextToSize(`"${note.highlight}"`, RIGHT_W - 5)
@@ -443,6 +493,21 @@ export async function exportPaperWithNotes(notes, file) {
         doc.setTextColor(55, 65, 81)
         doc.text(hlLines, RIGHT_X + 4, y + 4.5)
         y += hlBlockH + 2
+      }
+
+      // Attached image
+      if (note.image && y + 20 < PH - M) {
+        try {
+          const maxImgH = Math.min(50, PH - M - y - 5)
+          const imgEl = await new Promise((res) => {
+            const i = new Image(); i.onload = () => res(i); i.src = note.image
+          })
+          const ratio = imgEl.width / imgEl.height
+          const imgH = maxImgH
+          const imgW = Math.min(RIGHT_W, imgH * ratio)
+          doc.addImage(note.image, 'JPEG', RIGHT_X, y, imgW, imgH)
+          y += imgH + 3
+        } catch { /* skip broken image */ }
       }
 
       // AI explanation
@@ -488,7 +553,7 @@ export async function exportPaperWithNotes(notes, file) {
         doc.line(RIGHT_X, y + 1, RIGHT_X + RIGHT_W, y + 1)
         y += 5
       }
-    })
+    }
   }
 
   doc.save(`${name}-annotated.pdf`)

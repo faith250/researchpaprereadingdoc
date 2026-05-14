@@ -8,6 +8,14 @@
 
 ---
 
+## 🎬 Demo Video
+
+https://github.com/user-attachments/assets/githubdemo.mp4
+
+> Upload a PDF, highlight text, get AI explanations, attach diagrams, and export annotated notes — all in one tool.
+
+---
+
 ## 📸 Screenshots
 
 > **Tip for contributors:** Replace these placeholders with real screenshots after running `npm run dev`.
@@ -38,14 +46,19 @@
 - Split-panel view: PDF on the left, notes panel on the right
 - Select any text → **✨ Explain** for a plain-English AI explanation
 - Select any text → **💬 Ask** to type a custom question about the passage
-- AI uses the full page text as context (not just your selection) for better answers
-- Yellow highlights = Explain notes · Green highlights = Ask notes
+- Select any text → **📷 Image** to attach a diagram, photo, or handwritten note alongside your highlight
+- Yellow highlights = Explain · Green highlights = Ask · Orange highlights = Image attached
 - Click any highlight to jump to its note; click any note to jump to that page
 
+**Chat with Paper**
+- AI auto-reads and summarizes the entire paper on first open (cached per PDF)
+- **🌐 Chat with Paper** panel — ask anything about the paper without highlighting first
+- Every AI prompt includes the full paper summary for more accurate, context-aware answers
+
 **AI Providers**
-- **Ollama (local)** — free, unlimited, private; install any model directly from the app
+- **Groq (cloud, free)** — fastest option; free API key at [console.groq.com](https://console.groq.com); Llama 3.3 70B, Mixtral, Gemma 2
 - **Gemini (cloud)** — 1500 free requests/day with a Google AI Studio key
-- Explain and Ask prompts both include surrounding page context for accuracy
+- **Ollama (local)** — free, unlimited, private; install any model directly from the app
 
 **Persistence & Sync**
 - Notes auto-save to localStorage on every keystroke
@@ -54,8 +67,8 @@
 
 **Search & Export**
 - Live search across all notes (highlights + AI explanations + your own text)
-- **📰 Paper + Notes PDF** — landscape A4 with paper page on left, notes on right
-- **📄 Notes-only PDF** — clean formatted PDF of all annotations
+- **📰 Paper + Notes PDF** — landscape A4 with paper page on left, highlights drawn on the paper, notes on right
+- **📄 Notes-only PDF** — clean formatted PDF of all annotations (with attached images)
 - **📝 Word (.docx)** — styled Word document
 - **🗒️ Markdown (.md)** — plain-text, ready for Obsidian/Notion
 
@@ -82,12 +95,26 @@ Open **http://localhost:5173**
 
 ## 🤖 AI Setup
 
-Click **⚙️ Settings** inside the app.
+Click **⚙️ Settings** inside the app. Three providers are supported — all have a free tier.
 
-### Option A — Ollama (Recommended: free, local, private)
+### Option A — Groq (Recommended: free cloud, fastest)
+
+1. Get a free API key at [console.groq.com](https://console.groq.com) — no credit card needed
+2. Paste it in Settings → Groq → API Key
+3. **Free tier:** generous daily limits, blazing fast responses
+
+Available models: Llama 3.3 70B, Llama 3.1 8B, Gemma 2 9B, Mixtral 8x7B
+
+### Option B — Gemini (cloud)
+
+1. Get a free API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — no credit card
+2. Paste it in Settings → Gemini → API Key
+3. **Free tier:** 1500 requests/day with Gemini 2.5 Flash
+
+### Option C — Ollama (local, fully private)
 
 1. Install [Ollama](https://ollama.com) and run `ollama serve`
-2. In Settings → pick a model → click **⬇ Install Model** (downloads in the background)
+2. In Settings → Ollama → pick a model → click **⬇ Install Model**
 3. Click **Save Settings** — you're done
 
 Recommended models for research papers:
@@ -96,12 +123,6 @@ Recommended models for research papers:
 | `llama3.2` | 3B | Speed (good enough for most explanations) |
 | `llama3.3` | 8B | Quality (best answers, needs more RAM) |
 | `phi4-mini` | 3.8B | Very fast, surprisingly good |
-
-### Option B — Gemini (cloud)
-
-1. Get a free API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — no credit card
-2. Paste it in Settings → Gemini → API Key
-3. **Free tier:** 1500 requests/day with Gemini 2.5 Flash
 
 ---
 

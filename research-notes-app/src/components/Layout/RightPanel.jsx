@@ -141,11 +141,11 @@ function RightPanel({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                   <span style={{
                     fontSize: '11px', fontWeight: '600',
-                    color: isGeneral ? '#7c3aed' : note.question ? '#059669' : '#3b82f6',
-                    background: isGeneral ? '#f5f3ff' : note.question ? '#f0fdf4' : '#eff6ff',
+                    color: isGeneral ? '#7c3aed' : note.image ? '#ea580c' : note.question ? '#059669' : '#3b82f6',
+                    background: isGeneral ? '#f5f3ff' : note.image ? '#fff7ed' : note.question ? '#f0fdf4' : '#eff6ff',
                     padding: '2px 8px', borderRadius: '999px',
                   }}>
-                    {isGeneral ? '🌐 General' : note.question ? '💬 Ask' : '✨ Explain'}
+                    {isGeneral ? '🌐 General' : note.image ? '📷 Image' : note.question ? '💬 Ask' : '✨ Explain'}
                   </span>
                   <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                     {!isGeneral && (
@@ -171,6 +171,24 @@ function RightPanel({
                   }}>
                     "{note.highlight}"
                   </p>
+                )}
+
+                {/* Attached image */}
+                {note.image && (
+                  <div style={{ marginBottom: '10px' }}>
+                    <img
+                      src={note.image}
+                      alt="Attached diagram"
+                      onClick={(e) => e.stopPropagation()}
+                      style={{
+                        width: '100%', borderRadius: '8px',
+                        border: '1px solid #fed7aa',
+                        display: 'block', cursor: 'zoom-in',
+                        maxHeight: '300px', objectFit: 'contain',
+                        background: '#fff7ed',
+                      }}
+                    />
+                  </div>
                 )}
 
                 {/* Question */}
