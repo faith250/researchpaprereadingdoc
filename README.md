@@ -1,100 +1,183 @@
 # 📄 Research Notes
 
-An AI-powered research paper annotation tool. Upload any PDF, highlight text, and get instant AI explanations — all saved as notes right beside your paper.
+> An AI-powered research paper reading tool — highlight text, get instant explanations, ask questions, and export your annotated notes.
 
-![Research Notes App](https://img.shields.io/badge/React-18-blue?logo=react) ![Vite](https://img.shields.io/badge/Vite-5-purple?logo=vite) ![License](https://img.shields.io/badge/license-MIT-green)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white) ![Vite](https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white) ![License](https://img.shields.io/badge/license-MIT-22c55e) ![PRs Welcome](https://img.shields.io/badge/PRs-welcome-f59e0b)
+
+**[🚀 Live Demo →](https://your-app.vercel.app)** &nbsp;|&nbsp; **[⭐ Star this repo](https://github.com/your-username/research-notes-app)**
+
+---
+
+## 📸 Screenshots
+
+> **Tip for contributors:** Replace these placeholders with real screenshots after running `npm run dev`.
+
+| Home — Paper Library | Reader — Split Panel |
+|---|---|
+| ![Home page showing paper library grid](docs/screenshot-home.png) | ![Reader with PDF and notes side by side](docs/screenshot-reader.png) |
+
+| Highlight → Explain | Highlight → Ask |
+|---|---|
+| ![AI explanation tooltip](docs/screenshot-explain.png) | ![Ask question tooltip](docs/screenshot-ask.png) |
+
+| Export — Paper + Notes PDF | Settings — Ollama Install |
+|---|---|
+| ![Exported PDF with paper and notes side by side](docs/screenshot-export.png) | ![Settings panel with Ollama model installer](docs/screenshot-settings.png) |
 
 ---
 
 ## ✨ Features
 
-- **Split panel view** — PDF on the left, notes on the right, side by side
-- **Text highlighting** — select any text on the paper to annotate it
-- **AI explanations** — instantly explains highlighted text in plain English
-- **Bi-directional navigation** — click a highlight to jump to its note, click a note to jump to that page
-- **Multiple AI providers** — Gemini (free, 1500 req/day) or Ollama (local, unlimited)
-- **Your own thoughts** — add personal notes below every AI explanation
-- **Persistent highlights** — yellow overlays stay on the PDF as visual markers
+**Paper Library**
+- Drag & drop PDFs or browse to upload
+- Papers are stored locally in your browser (IndexedDB) — no re-uploading ever
+- See note count and last-opened time for each paper
+- Click "Continue →" to pick up exactly where you left off
+
+**Reading & Annotations**
+- Split-panel view: PDF on the left, notes panel on the right
+- Select any text → **✨ Explain** for a plain-English AI explanation
+- Select any text → **💬 Ask** to type a custom question about the passage
+- AI uses the full page text as context (not just your selection) for better answers
+- Yellow highlights = Explain notes · Green highlights = Ask notes
+- Click any highlight to jump to its note; click any note to jump to that page
+
+**AI Providers**
+- **Ollama (local)** — free, unlimited, private; install any model directly from the app
+- **Gemini (cloud)** — 1500 free requests/day with a Google AI Studio key
+- Explain and Ask prompts both include surrounding page context for accuracy
+
+**Persistence & Sync**
+- Notes auto-save to localStorage on every keystroke
+- PDFs stored in IndexedDB — reopen without uploading again
+- Optional **Google Drive sync** — notes back up automatically across devices
+
+**Search & Export**
+- Live search across all notes (highlights + AI explanations + your own text)
+- **📰 Paper + Notes PDF** — landscape A4 with paper page on left, notes on right
+- **📄 Notes-only PDF** — clean formatted PDF of all annotations
+- **📝 Word (.docx)** — styled Word document
+- **🗒️ Markdown (.md)** — plain-text, ready for Obsidian/Notion
 
 ---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
+- [Node.js](https://nodejs.org) v18+
+- npm v9+
 
-- [Node.js](https://nodejs.org) v18 or higher
-- npm v9 or higher
-
-### Installation
+### Run locally
 
 ```bash
-# Clone the repository
 git clone https://github.com/your-username/research-notes-app.git
-
-# Navigate into the project
-cd research-notes-app
-
-# Install dependencies
+cd research-notes-app/research-notes-app
 npm install
-
-# Start the development server
 npm run dev
 ```
 
-Open [http://localhost:5173](http://localhost:5173) in your browser.
+Open **http://localhost:5173**
 
 ---
 
 ## 🤖 AI Setup
 
-The app supports two AI providers. Configure them via the **⚙️ AI Settings** button in the top bar.
+Click **⚙️ Settings** inside the app.
 
-### Option 1: Gemini (Recommended — Free)
+### Option A — Ollama (Recommended: free, local, private)
 
-1. Get a free API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — no credit card needed
-2. Open **AI Settings** in the app
-3. Select **Gemini** as the provider
-4. Paste your API key and choose a model
-5. Click **Save Settings**
+1. Install [Ollama](https://ollama.com) and run `ollama serve`
+2. In Settings → pick a model → click **⬇ Install Model** (downloads in the background)
+3. Click **Save Settings** — you're done
 
-**Free tier:** 1500 requests/day with Gemini 2.0 Flash Lite
+Recommended models for research papers:
+| Model | Size | Best for |
+|---|---|---|
+| `llama3.2` | 3B | Speed (good enough for most explanations) |
+| `llama3.3` | 8B | Quality (best answers, needs more RAM) |
+| `phi4-mini` | 3.8B | Very fast, surprisingly good |
 
-### Option 2: Ollama (Local — Unlimited & Private)
+### Option B — Gemini (cloud)
 
-1. Install Ollama from [ollama.com](https://ollama.com)
-2. Start the server:
-   ```bash
-   ollama serve
-   ```
-3. Pull a model:
-   ```bash
-   ollama pull llama3
-   ```
-4. Open **AI Settings** in the app, select **Ollama**, and save
+1. Get a free API key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — no credit card
+2. Paste it in Settings → Gemini → API Key
+3. **Free tier:** 1500 requests/day with Gemini 2.5 Flash
 
-No API key needed. Runs entirely on your machine.
+---
+
+## ☁️ Google Drive Sync (optional)
+
+Automatically backs up all your notes to your Google Drive so they're available on any device.
+
+**5-minute setup:**
+1. Go to [console.cloud.google.com](https://console.cloud.google.com) → New Project
+2. **APIs & Services** → Enable → search "Google Drive API" → Enable
+3. **Credentials** → Create → OAuth 2.0 Client ID → Web Application
+4. Add `http://localhost:5173` (and your Vercel URL) to **Authorised JavaScript origins**
+5. Copy the Client ID → paste it in **⚙️ Settings → Google Drive Client ID** → Save
+6. Click **☁️ Connect Drive** in the reader top bar → sign in → done
+
+Notes are stored in your Google Drive's hidden App Data folder (not visible in the Drive UI, only this app can access them).
+
+---
+
+## 🌐 Deploy for others to use
+
+### Vercel (recommended — free)
+
+```bash
+npm install -g vercel
+cd research-notes-app
+vercel --prod
+```
+
+Vercel auto-detects the Vite build. Your app is live in ~60 seconds at a `*.vercel.app` URL.
+
+After deploying, add your Vercel URL to the **Authorised JavaScript origins** in your Google Cloud Console if you're using Drive sync.
+
+### Netlify
+
+```bash
+npm install -g netlify-cli
+cd research-notes-app
+netlify deploy --prod --dir dist
+```
+
+### GitHub Pages
+
+```bash
+npm run build
+# then push the /dist folder to the gh-pages branch
+```
+
+Add `base: '/research-notes-app/'` to `vite.config.ts` first.
 
 ---
 
 ## 🗂️ Project Structure
 
 ```
-src/
-├── components/
-│   ├── Layout/
-│   │   ├── SplitPanel.jsx       # Two-panel container + notes state
-│   │   ├── LeftPanel.jsx        # PDF viewer side
-│   │   └── RightPanel.jsx       # Notes side
-│   ├── PdfViewer/
-│   │   └── PdfViewer.jsx        # PDF rendering + highlight detection
-│   └── Settings/
-│       └── SettingsPanel.jsx    # AI provider configuration modal
-├── pages/
-│   ├── Home.jsx                 # Upload screen
-│   └── Reader.jsx               # Main reading view
-├── services/
-│   └── aiService.js             # Gemini + Ollama API calls
-└── App.jsx                      # Root component
+research-notes-app/
+├── src/
+│   ├── components/
+│   │   ├── Layout/
+│   │   │   ├── SplitPanel.jsx      # Notes state, localStorage + Drive sync, search, export
+│   │   │   ├── LeftPanel.jsx       # PDF viewer wrapper
+│   │   │   └── RightPanel.jsx      # Notes panel with search + Ask/Explain badges
+│   │   ├── PdfViewer/
+│   │   │   └── PdfViewer.jsx       # PDF rendering, text selection, Explain/Ask tooltip, page-text extraction
+│   │   └── Settings/
+│   │       └── SettingsPanel.jsx   # AI provider config, Ollama model installer, Drive setup
+│   ├── pages/
+│   │   ├── Home.jsx                # Paper library grid + upload zone
+│   │   └── Reader.jsx              # Reader shell, Drive connect button, top bar
+│   ├── services/
+│   │   ├── aiService.js            # Gemini + Ollama + Ollama model pull
+│   │   └── driveService.js         # Google Drive OAuth + notes sync
+│   └── utils/
+│       ├── paperStore.js           # IndexedDB save/load/list/delete PDFs
+│       └── exportNotes.js          # PDF, DOCX, Markdown, Paper+Notes PDF export
+└── App.tsx                         # Root — library ↔ reader navigation
 ```
 
 ---
@@ -103,42 +186,47 @@ src/
 
 | Tool | Purpose |
 |---|---|
-| React 18 | UI framework |
-| Vite | Build tool |
-| react-pdf | PDF rendering + text layer |
-| Tailwind CSS | Styling |
-| Gemini API | AI explanations (cloud) |
-| Ollama | AI explanations (local) |
-
----
-
-## 📖 How to Use
-
-1. **Upload** a PDF research paper on the home screen
-2. **Read** the paper on the left panel
-3. **Select** any text you want to understand
-4. Click **✨ Explain + Add Note** in the tooltip
-5. The AI explanation appears as a note card on the right
-6. **Add your own thoughts** in the text area below each explanation
-7. Click any **yellow highlight** on the PDF to jump to its note
-8. Click any **note card** to jump back to that page in the PDF
+| React 19 | UI |
+| Vite 8 | Build tool |
+| react-pdf / pdfjs-dist | PDF rendering + text layer |
+| Tailwind CSS v4 | Styling |
+| jsPDF | PDF export |
+| docx | Word document export |
+| IndexedDB | PDF file storage |
+| Google Identity Services | Drive OAuth |
+| Gemini API | Cloud AI |
+| Ollama | Local AI |
 
 ---
 
 ## 🗺️ Roadmap
 
-- [x] Week 1 — PDF upload + split panel viewer
-- [x] Week 2 — Text selection, highlights, notes panel
-- [x] Week 3 — AI explanations via Gemini / Ollama
-- [ ] Week 4 — Persist notes (reload paper = notes come back)
-- [ ] Week 5 — Export notes as PDF or Word doc
-- [ ] Week 6 — Paper library, search notes, multiple papers
+- [x] PDF upload + split-panel viewer
+- [x] Text selection, highlights, notes panel
+- [x] AI explanations (Gemini + Ollama)
+- [x] localStorage persistence
+- [x] Export — PDF, DOCX, Markdown, Paper+Notes PDF
+- [x] Search notes
+- [x] Paper library (IndexedDB — never re-upload)
+- [x] Explain + Ask tooltip with page context
+- [x] Ollama model installer inside the app
+- [x] Google Drive sync (notes backup)
+- [ ] Supabase sync (cloud DB for multi-device notes)
+- [ ] Shared annotations (collaborate on a paper)
+- [ ] Browser extension for web articles
 
 ---
 
 ## 🤝 Contributing
 
-Pull requests are welcome. For major changes, please open an issue first.
+PRs are welcome! Please open an issue first for major changes.
+
+```bash
+git checkout -b feature/my-feature
+git commit -m "feat: describe what you added"
+git push origin feature/my-feature
+# open a Pull Request
+```
 
 ---
 

@@ -1,6 +1,6 @@
 import PdfViewer from '../PdfViewer/PdfViewer'
 
-function LeftPanel({ file, onAddNote, notes, activeNoteId, onHighlightClick, pageElRefs, aiSettings }) {
+function LeftPanel({ file, onAddNote, notes, activeNoteId, onHighlightClick, pageElRefs, aiSettings, onPaperLoaded, paperSummary }) {
   return (
     <div>
       {file ? (
@@ -12,6 +12,8 @@ function LeftPanel({ file, onAddNote, notes, activeNoteId, onHighlightClick, pag
           onHighlightClick={onHighlightClick}
           pageElRefs={pageElRefs}
           aiSettings={aiSettings}
+          onPaperLoaded={onPaperLoaded}
+          paperSummary={paperSummary}
         />
       ) : (
         <p style={{ color: '#9ca3af', marginTop: '80px' }}>No paper loaded</p>
