@@ -10,27 +10,25 @@
 
 ## 🎬 Demo Video
 
-https://github.com/user-attachments/assets/githubdemo.mp4
+<video src="https://raw.githubusercontent.com/faith250/researchpaprereadingdoc/main/docs/githubdemo.mp4" controls width="100%"></video>
 
-> Upload a PDF, highlight text, get AI explanations, attach diagrams, and export annotated notes — all in one tool.
+> [▶ Click here to watch the demo](https://raw.githubusercontent.com/faith250/researchpaprereadingdoc/main/docs/githubdemo.mp4) — Upload a PDF, highlight text, get AI explanations, attach diagrams, and export annotated notes.
 
 ---
 
 ## 📸 Screenshots
 
-> **Tip for contributors:** Replace these placeholders with real screenshots after running `npm run dev`.
-
 | Home — Paper Library | Reader — Split Panel |
 |---|---|
-| ![Home page showing paper library grid](docs/screenshot-home.png) | ![Reader with PDF and notes side by side](docs/screenshot-reader.png) |
+| ![Home](docs/screenshot-home.png) | ![Reader](docs/screenshot-reader.png) |
 
-| Highlight → Explain | Highlight → Ask |
-|---|---|
-| ![AI explanation tooltip](docs/screenshot-explain.png) | ![Ask question tooltip](docs/screenshot-ask.png) |
+| Highlight → Explain | Highlight → Ask | Image Attach |
+|---|---|---|
+| ![Explain](docs/screenshot-explain.png) | ![Ask](docs/screenshot-ask.png) | ![Image](docs/screenshot-image.png) |
 
-| Export — Paper + Notes PDF | Settings — Ollama Install |
+| Export — Paper + Notes PDF | Settings — AI Provider |
 |---|---|
-| ![Exported PDF with paper and notes side by side](docs/screenshot-export.png) | ![Settings panel with Ollama model installer](docs/screenshot-settings.png) |
+| ![Export](docs/screenshot-export.png) | ![Settings](docs/screenshot-settings.png) |
 
 ---
 
