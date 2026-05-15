@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Analytics } from '@vercel/analytics/react'
 import Home from './pages/Home'
 import Reader from './pages/Reader'
 import { savePaper, loadPaperAsFile, touchPaper } from './utils/paperStore'
@@ -80,6 +81,7 @@ function App() {
       ) : (
         <Home onFileUpload={handleFileUpload} onOpenPaper={handleOpenPaper} />
       )}
+      <Analytics />
     </>
   )
 }
